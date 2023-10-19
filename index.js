@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 
 const port = process.env.PORT || 5000;
@@ -44,6 +44,34 @@ async function run() {
             res.send(result);
         })
 
+        app.get('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)}
+            const result = await productCollection.findOne(query)
+            res.send(result);
+        })
+
+        app.put('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true };
+            const updatedProduct = req.body;
+
+            const product = {
+                $set: {
+                    name: updatedProduct.name,
+                    brand: updatedProduct.brand,
+                    type: updatedProduct.type,
+                    price: updatedProduct.price,
+                    rating: updatedProduct.rating,
+                    photo: updatedProduct.photo
+                }
+            }
+
+            const result = await productCollection.updateOne(filter, product, options);
+            res.send(result);
+        })
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -63,3 +91,9 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`brand server is running on port ${port}`);
 })
+
+
+
+// github-server-repo: https://github.com/programming-hero-web-course-4/b8a10-brandshop-server-side-MdAbdullahIbnNoor
+
+// github-client-repo: https://github.com/programming-hero-web-course-4/b8a10-brandshop-client-side-MdAbdullahIbnNoor
