@@ -30,6 +30,7 @@ async function run() {
 
 
         const productCollection = client.db('productDB').collection('productCollection');
+        const userCollection = client.db('productDB').collection('userCollection');
 
         app.post('/products', async (req, res) => {
             const newProduct = req.body;
@@ -71,6 +72,20 @@ async function run() {
             const result = await productCollection.updateOne(filter, product, options);
             res.send(result);
         })
+
+         // user related apis
+         app.get('/users', async (req, res) => {
+            const cursor = userCollection.find();
+            const users = await cursor.toArray();
+            res.send(users);
+        })
+
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            console.log(user);
+            const result = await userCollection.insertOne(user);
+            res.send(result);
+        });
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
