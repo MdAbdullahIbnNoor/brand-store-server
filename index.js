@@ -30,7 +30,7 @@ async function run() {
 
 
         const productCollection = client.db('productDB').collection('productCollection');
-        const userCollection = client.db('productDB').collection('userCollection');
+        const cartProductCollection = client.db('productDB').collection('cartProductCollection');
 
         app.post('/products', async (req, res) => {
             const newProduct = req.body;
@@ -73,19 +73,33 @@ async function run() {
             res.send(result);
         })
 
-         // user related apis
-         app.get('/users', async (req, res) => {
-            const cursor = userCollection.find();
-            const users = await cursor.toArray();
-            res.send(users);
+         // cart related apis
+         app.post('/cartProducts', async (req, res) => {
+            const newProduct = req.body;
+            console.log(newProduct);
+            const result = await cartProductCollection.insertOne(newProduct);
+            res.send(result);
         })
 
-        app.post('/users', async (req, res) => {
-            const user = req.body;
-            console.log(user);
-            const result = await userCollection.insertOne(user);
+        app.get('/cartProducts', async (req, res) => {
+            const cursor = cartProductCollection.find();
+            const result = await cursor.toArray();
             res.send(result);
-        });
+        })
+
+        app.get('/cartProducts/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)}
+            const result = await cartProductCollection.findOne(query)
+            res.send(result);
+        })
+
+        app.delete('/cartProducts/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await cartProductCollection.deleteOne(query);
+            res.send(result);
+        })
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
